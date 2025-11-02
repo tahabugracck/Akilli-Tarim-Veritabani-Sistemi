@@ -1,0 +1,111 @@
+erDiagram
+    %% İlişki Tanımlamaları
+    CIFTCI ||--o{ TARLA : "sahiptir"
+    TARLA ||--o{ SENSOR : "içerir"
+    SENSOR ||--o{ OLCUM : "kaydeder"
+    TARLA ||--o{ ONERI : "alır"
+    TARLA ||--o{ UYARI : "oluşturur"
+    ONERI }|--o{ UYARI : "tetikler (opsiyonel)"
+    TARLA ||--o{ RAPOR : "hazırlanır"
+    CIFTCI ||--o{ CIFTCI_ISLEMLERI : "yapar"
+    TARLA ||--o{ CIFTCI_ISLEMLERI : "üzerinde yapılır"
+
+    %% === YENİ N:M İLİŞKİ (İlişki Tablosu ile) ===
+    TARLA }o--o{ EKIN : "yetiştirir"
+    %% Yukarıdaki N:M ilişkiyi çözmek için TARLA_EKINLERI tablosu kullanılır
+    TARLA ||--o{ TARLA_EKINLERI : "ilişkili"
+    EKIN ||--o{ TARLA_EKINLERI : "ilişkili"
+
+
+    %% Tablo Detayları (Varlıklar)
+    CIFTCI {
+        int id PK
+        string ad
+        string soyad
+        string telefon_numarasi
+    }
+
+    TARLA {
+        int id PK
+        int ciftci_id FK "Sahip Çiftçi"
+        string konum "Tarlanın Yeri"
+        float tarla_en
+        float tarla_boy
+        float tarla_boyut
+        string toprak_tipi
+        %% 'ekin_turu' alanı N:M ilişki için kaldırıldı
+    }
+
+    SENSOR {
+        int id PK
+        string sensor_tipi "Nem, Sıcaklık, PH"
+        int tarla_id FK
+    }
+
+    OLCUM {
+        int id PK
+        int sensor_id FK
+        float deger
+        datetime tarih
+    }
+
+    ONERI {
+        int id PK
+        int tarla_id FK
+        float hedef_nem
+        float hedef_sicaklik
+        float hedef_ph
+        float hedef_su_miktari
+        float hedef_gubre_miktari
+        datetime tarih
+        boolean uygulandi_mi
+    }
+
+    UYARI {
+        int id PK
+        int tarla_id FK
+        string mesaj
+        int oneri_id FK "İlgili Öneri (Nullable)"
+        datetime tarih
+    }
+
+    RAPOR {
+        int id PK
+        int tarla_id FK
+        int ay
+        int yil
+        float ortalama_nem
+        float ortalama_sicaklik
+        float ortalama_ph
+        integer toplam_uyari
+        float basari_orani
+    }
+
+    CIFTCI_ISLEMLERI {
+        int id PK
+        int ciftci_id FK
+        int tarla_id FK
+        string islem_turu "Sulama, Gübreleme, Hasat"
+        float miktar
+        string birim
+        datetime tarih
+        string aciklama
+    }
+
+    %% === YENİ EKLENEN TABLOLAR ===
+    
+    %% Yeni Ana Varlık
+    EKIN {
+        int id PK
+        string ad "Örn: Buğday, Mısır, Ayçiçeği"
+        string varyete "Opsiyonel"
+    }
+
+    %% Yeni İlişki Tablosu (Junction Table)
+    TARLA_EKINLERI {
+        int tarla_id FK "Hangi tarla"
+        int ekin_id FK "Hangi ekin"
+        date ekim_tarihi
+        date beklenen_hasat_tarihi
+        string durum "Örn: Ekildi, Büyüyor, Hasat Edildi"
+    }
